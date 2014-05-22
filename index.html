@@ -285,6 +285,12 @@ function checkAuth(authResult, invisibleAuth, callback) {
 
 function initJsApi() {
   gapi.client.load('genomics', 'v1beta', function() {});
+
+  // Check the clientId field
+  if (clientId == 'your-client-id-goes-here') {
+    alert('You need to provide a real clientId to use this code. ' +
+        'Check the README for more instructions.');
+  }
 }
 </script>
 <script src="https://apis.google.com/js/client.js?onload=initJsApi"></script>
