@@ -1,9 +1,7 @@
 api-client-javascript
 =====================
 
-****
-###Important note: Currently, the variant APIs are still being tested and are not yet 
-available to everyone. See [the docs](http://google-genomics.readthedocs.org/en/latest/auth_requirements.html#available-apis) for more details.
+###Important note: Currently, the variant APIs are still being tested and are not yet available to everyone. See [the docs](http://google-genomics.readthedocs.org/en/latest/auth_requirements.html#available-apis) for more details.
 ****
 
 
