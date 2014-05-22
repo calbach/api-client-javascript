@@ -1,0 +1,292 @@
+<!--
+Copyright 2014 Google Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" charset="utf-8"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+  <style>
+    #scoreTable tr th:nth-child(4), #scoreTable tr td:nth-child(4) {
+      border-right: 2px solid #999;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container panel panel-default" style="width: 600px; margin-top: 20px;">
+  <div class="panel-body">
+    <form class="form">
+      <div class="form-group">
+        <label for="callsetId">Enter your callset ID</label>
+        <input type="text" class="form-control" id="callsetId" value="376902546192-0"/> <!-- HG00096 in 1000 genomes -->
+      </div>
+      <div class="form-group">
+        <label for="panelSelector">Choose a gene panel</label>
+        <select class="form-control" id="panelSelector"></select>
+      </div>
+    </form>
+
+    <div>
+      <table class="table table-hover" id="scoreTable">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Contig</th>
+          <th>Position</th>
+          <th>Allele</th>
+          <th>Callset genotype</th>
+          <th>Callset score</th>
+        </tr>
+        </thead>
+        <tbody id="alleleScores"></tbody>
+        <tfoot>
+        <tr>
+          <td colspan="5"></td>
+          <td id="totalScore" class="callsetClear" style="font-weight: bold;"></td>
+        </tr>
+        </tfoot>
+      </table>
+      <button class="btn btn-primary" id="scoreButton" data-loading-text="Loading data"
+              onclick="calculateScore(true)">Score</button>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+// Constants
+var clientId = 'your-client-id-goes-here';
+var scopes = 'https://www.googleapis.com/auth/genomics';
+
+var genePanels = [
+  // Red hair indicators
+  {name: 'Red hair', alleles: [
+    {name: 'rs34474212', description: 'Gene MC1R, normally C or T',
+      contig: '16', position: 89985913, allele: 'C', score: 1},
+
+    {name: 'rs1805006', description: 'Gene MC1R, normally A or C',
+      contig: '16', position: 89985918, allele: 'A', score: 1},
+
+    {name: 'rs11547464', description: 'Gene MC1R, normally A or G',
+      contig: '16', position: 89986091, allele: 'A', score: 1},
+
+    {name: 'rs1110400', description: 'Gene MC1R, normally C or T',
+      contig: '16', position: 89986130, allele: 'C', score: 1},
+
+    {name: 'rs1805007', description: 'Gene MC1R, normally C or G or T',
+      contig: '16', position: 89986117, allele: 'T', score: 1},
+
+    {name: 'rs1805008', description: 'Gene MC1R, normally C or T',
+      contig: '16', position: 89986144, allele: 'T', score: 1},
+
+    {name: 'i3002507', description: 'Gene MC1R, normally C or G',
+      contig: '16', position: 89986546, allele: 'C', score: 1}
+  ], scoreBands: [
+    {score: 2, description: 'Probably has red hair'},
+    {score: 0, description: 'Probably does not have red hair'}
+  ]
+  },
+
+  // Gene panel test
+  {name: 'Test', alleles: [
+    {contig: '22', position: 16051477, allele: 'A', score: 5},
+    {contig: '22', position: 16051477, allele: 'C', score: 3}
+  ], scoreBands: [
+    {score: 6, description: 'Highest'},
+    {score: 1, description: 'Medium'},
+    {score: 0, description: 'Lowest'}
+  ]
+  }
+];
+
+
+// Load the gene panel data into the UI
+var currentPanel = null;
+$(document).ready(function() {
+  var selector = $("#panelSelector");
+  var alleleScores = $("#alleleScores");
+  var totalScore = $("#totalScore");
+
+  for (var i = 0; i < genePanels.length; i++) {
+    $("<option/>", {"value": i}).text(genePanels[i].name).appendTo(selector);
+  }
+
+  selector.change(function() {
+    currentPanel = genePanels[selector.val()];
+    alleleScores.empty().append(createAlleleRows(currentPanel));
+    totalScore.empty();
+  }).change();
+});
+
+function createAlleleRows(panel) {
+  var rows = [];
+  for (var i = 0; i < panel.alleles.length; i++) {
+    var allele = panel.alleles[i];
+    var row = $("<tr/>");
+    $("<td/>").text(allele.name).appendTo(row);
+    $("<td/>").text(allele.contig).appendTo(row);
+    $("<td/>").text(allele.position).appendTo(row);
+    $("<td/>").text(allele.allele).appendTo(row);
+    $("<td/>", {id: "callsetAllele" + i, 'class': 'callsetClear'}).appendTo(row);
+    $("<td/>", {id: "callsetScore" + i, 'class': 'callsetClear'}).appendTo(row);
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+
+// Scoring handlers
+
+function calculateScore() {
+  $("#scoreButton").button('loading');
+  $(".callsetClear").empty();
+  $("#alleleScores tr").removeClass();
+
+  authUser(true, function() {
+    scorePanel(currentPanel);
+  });
+}
+
+function scorePanel(panel) {
+  var callsetInput = $("#callsetId");
+  var callsetId = callsetInput.val();
+
+  // First lookup the callset to get the datasetId
+  gapi.client.genomics.callsets.get(callsetId).execute(function(json, raw) {
+    // TODO: This call isn't implemented yet! For now, we'll just hardcode the datasetId
+    // TODO: After it works again, if the call errors out, tell the user the callsetId is invalid
+    var datasetId = "376902546192";
+
+    var totals = {finished: 0, score: 0, count: panel.alleles.length};
+    for (var i = 0; i < panel.alleles.length; i++) {
+      var allele = panel.alleles[i];
+      scoreAllele(datasetId, callsetId, allele, i, totals);
+    }
+  });
+}
+
+function scoreAllele(datasetId, callsetId, allele, number, totals) {
+  var params = {
+    datasetId: datasetId,
+    contig: allele.contig,
+    startPosition: allele.position,
+    endPosition: allele.position,
+    callsetIds: [callsetId]
+  };
+
+  // Search over the variants at each contig position to see what
+  // genotype the callset has.
+  gapi.client.genomics.variants.search(params).execute(function(json) {
+    var callsetGenotype = getGenotype(json.variants || [],
+        allele.position, callsetId);
+
+    var matchesAllele = callsetGenotype.indexOf(allele.allele) != -1;
+    var callsetScore = matchesAllele ? allele.score : 0;
+
+    $("#callsetAllele" + number).text(callsetGenotype.join(";"));
+    $("#callsetScore" + number).text(callsetScore).parent()
+        .addClass(matchesAllele ? "success" : "");
+
+    totals.score += callsetScore;
+    totals.finished++;
+
+
+    // Once all the alleles have been loaded, display the total score
+    if (totals.finished == totals.count) {
+      var description = "";
+      for (var i = 0; i < currentPanel.scoreBands.length; i++) {
+        var band = currentPanel.scoreBands[i];
+        if (totals.score >= band.score) {
+          description = band.description;
+          break;
+        }
+      }
+
+      $("#scoreButton").button('reset');
+
+      var scoreDiv = $("#totalScore");
+      $("<div>").text(totals.score).appendTo(scoreDiv);
+      $("<div>").text(description).appendTo(scoreDiv);
+    }
+  });
+}
+
+function getGenotype(variants, position, callsetId) {
+  // Excessively complicated logic to figure out the actual genotype for
+  // a callset at a given spot
+  for (var i = 0; i < variants.length; i++) {
+    var variant = variants[i];
+    if (variant.position != position) {
+      continue;
+    }
+
+    for (var c = 0; c < variant.calls.length; c++) {
+      var call = variant.calls[c];
+      if (call.callsetId != callsetId) {
+        continue;
+      }
+
+      // TODO: Switch to genotype field when its ready
+      var genotype = [];
+      var splits = call.info["GT"][0].split(/[|\/]/);
+      for (var g = 0; g < splits.length; g++) {
+        var allele = splits[g];
+        if (allele == 0) {
+          genotype.push(variant.referenceBases);
+        } else {
+          genotype.push(variant.alternateBases[allele - 1]);
+        }
+      }
+
+      return genotype;
+    }
+  }
+
+  return ["unknown"];
+}
+
+
+// Authorization handlers
+
+function authUser(invisibleAuth, callback) {
+  var params = {client_id: clientId, scope: scopes, immediate: invisibleAuth};
+  gapi.auth.authorize(params, function(authResult) {
+    checkAuth(authResult, invisibleAuth, callback);
+  });
+}
+
+function checkAuth(authResult, invisibleAuth, callback) {
+  if (authResult && !authResult.error) {
+    callback();
+  } else if (invisibleAuth) {
+    authUser(false, callback);
+  } else {
+    // The user rejected our auth request
+    // TODO: Display an error
+  }
+}
+
+function initJsApi() {
+  gapi.client.load('genomics', 'v1beta', function() {});
+}
+</script>
+<script src="https://apis.google.com/js/client.js?onload=initJsApi"></script>
+</body>
+</html>
