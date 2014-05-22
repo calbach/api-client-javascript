@@ -1,6 +1,12 @@
 api-client-javascript
 =====================
 
+****
+###Important note: Currently, the variant APIs are still being tested and are not yet 
+available to everyone. See [the docs](http://google-genomics.readthedocs.org/en/latest/auth_requirements.html#available-apis) for more details.
+****
+
+
 ## Getting started
 
 `index.html` is currently the only code file in this repository. You can open
@@ -21,7 +27,7 @@ To get data from the API, you will also need to use a real Client ID.
   https://developers.google.com/genomics/
 
 * Then create a project in the
-  `Google Developers Console <https://console.developers.google.com>`_
+  [Google Developers Console](https://console.developers.google.com>)
   or select an existing one.
 
 * On the **APIs & auth** tab, select APIs and turn the Genomics API to ON
@@ -35,14 +41,14 @@ To get data from the API, you will also need to use a real Client ID.
 * Click the **Create Client ID** button
 
 * From the newly created **Client ID for web application**, copy the `Client ID`
-  value into index.html into the `clientId` variable inside `index.html`.
-  The clientId line:
+  value into the `clientId` variable inside `index.html`.
+  The clientId line that used to look like this:
 
   `var clientId = 'your-client-id-goes-here';`
 
-  should now look more like this:
+  should now be more like this:
 
-  `var clientId = '12345.apps.googleusercontent.com;`
+  `var clientId = '12345.apps.googleusercontent.com';`
 
 * Save the index.html file, reload the `http://localhost:8000` page, and
   all of the API calls should work.
@@ -60,7 +66,8 @@ It uses [Bootstrap](getbootstrap.com), [jQuery](http://jquery.com/), and
 [Google's javascript client library](https://developers.google.com/api-client-library/javascript/).
 
 The file contains some simple html construction based on the `genePanels` json variable.
-It then uses the js API to search variants and lookup genotype information for a callset.
+It then uses the [Genomics API](http://developers.google.com/genomics) 
+to search variants and lookup genotype information for a callset.
 
 The `Authorization handlers` at the very bottom of the file would be the
 easiest to reuse in a different javascript integration.
