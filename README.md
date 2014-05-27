@@ -7,8 +7,8 @@ api-client-javascript
 
 ## Getting started
 
-`index.html` is currently the only code file in this repository. You can open
-that file up in your browser directly, but the javascript APIs won't work unless
+There are 2 code files in this repository: `index.html` and `googlegenomics.jquery.js`
+You can open `index.html` in your browser directly, but the javascript APIs won't work unless
 the HTML is hosted somewhere. (The Bootstrap css won't load from a `file://` prefix either)
 
 To run a simple HTTP server locally, you can use python:
@@ -42,11 +42,11 @@ To get data from the API, you will also need to use a real Client ID.
   value into the `clientId` variable inside `index.html`.
   The clientId line that used to look like this:
 
-  `var clientId = 'your-client-id-goes-here';`
+  `$.initGenomics({clientId: 'your-client-id-goes-here'});`
 
   should now be more like this:
 
-  `var clientId = '12345.apps.googleusercontent.com';`
+  `$.initGenomics({clientId: '12345.apps.googleusercontent.com'});`
 
 * Save the index.html file, reload the `http://localhost:8000` page, and
   all of the API calls should work.
@@ -58,17 +58,19 @@ javascript origins on your Client ID to include that new domain.
 
 ## Code layout
 
-There is only one file: `index.html`.
+index.html:
 
-It uses [Bootstrap](getbootstrap.com), [jQuery](http://jquery.com/), and
-[Google's javascript client library](https://developers.google.com/api-client-library/javascript/).
+  loads [Bootstrap](getbootstrap.com) and [jQuery](http://jquery.com/)
 
-The file contains some simple html construction based on the `genePanels` json variable.
-It then uses the [Genomics API](http://developers.google.com/genomics) 
-to search variants and lookup genotype information for a callset.
+  The file contains some simple html construction based on the `genePanels` json variable.
+  It then uses `googlegenomics.jquery.js` to search variants and lookup
+  genotype information for a callset.
 
-The `Authorization handlers` at the very bottom of the file would be the
-easiest to reuse in a different javascript integration.
+googlegenomics.jquery.js:
+
+  this is a work-in-progress jQuery plugin that makes fetching data from the
+  [Genomics API](http://developers.google.com/genomics) a bit easier. It wraps
+  [Google's javascript client library](https://developers.google.com/api-client-library/javascript/).
 
 
 ## Project status

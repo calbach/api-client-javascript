@@ -18,6 +18,7 @@ limitations under the License.
 <head>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" charset="utf-8"></script>
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <script src="googlegenomics.jquery.js"></script>
 
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
@@ -71,8 +72,7 @@ limitations under the License.
 
 <script type="text/javascript">
 // Constants
-var clientId = 'your-client-id-goes-here';
-var scopes = 'https://www.googleapis.com/auth/genomics';
+$.initGenomics({clientId: 'your-client-id-goes-here'});
 
 var genePanels = [
   // Red hair indicators
@@ -159,12 +159,10 @@ function calculateScore() {
   $(".callsetClear").empty();
   $("#alleleScores tr").removeClass();
 
-  authUser(true, function() {
-    scorePanel(currentPanel);
-  });
+  $.authGenomics(scorePanel);
 }
 
-function scorePanel(panel) {
+function scorePanel() {
   var callsetInput = $("#callsetId");
   var callsetId = callsetInput.val();
 
@@ -174,9 +172,9 @@ function scorePanel(panel) {
     // TODO: After it works again, if the call errors out, tell the user the callsetId is invalid
     var datasetId = "376902546192";
 
-    var totals = {finished: 0, score: 0, count: panel.alleles.length};
-    for (var i = 0; i < panel.alleles.length; i++) {
-      var allele = panel.alleles[i];
+    var totals = {finished: 0, score: 0, count: currentPanel.alleles.length};
+    for (var i = 0; i < currentPanel.alleles.length; i++) {
+      var allele = currentPanel.alleles[i];
       scoreAllele(datasetId, callsetId, allele, i, totals);
     }
   });
@@ -261,38 +259,6 @@ function getGenotype(variants, position, callsetId) {
 
   return ["unknown"];
 }
-
-
-// Authorization handlers
-
-function authUser(invisibleAuth, callback) {
-  var params = {client_id: clientId, scope: scopes, immediate: invisibleAuth};
-  gapi.auth.authorize(params, function(authResult) {
-    checkAuth(authResult, invisibleAuth, callback);
-  });
-}
-
-function checkAuth(authResult, invisibleAuth, callback) {
-  if (authResult && !authResult.error) {
-    callback();
-  } else if (invisibleAuth) {
-    authUser(false, callback);
-  } else {
-    // The user rejected our auth request
-    // TODO: Display an error
-  }
-}
-
-function initJsApi() {
-  gapi.client.load('genomics', 'v1beta', function() {});
-
-  // Check the clientId field
-  if (clientId == 'your-client-id-goes-here') {
-    alert('You need to provide a real clientId to use this code. ' +
-        'Check the README for more instructions.');
-  }
-}
 </script>
-<script src="https://apis.google.com/js/client.js?onload=initJsApi"></script>
 </body>
 </html>
