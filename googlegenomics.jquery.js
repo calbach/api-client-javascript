@@ -46,9 +46,10 @@ limitations under the License.
 
   function checkAuth(authResult, invisibleAuth, callback) {
     if (authResult && !authResult.error) {
+      settings.userAuthorized = true;
       callback();
     } else if (invisibleAuth) {
-      authUser(false, callback);
+      callback();
     } else {
       // Something went wrong with the auth flow
       throw new Error("Authorization failed");
@@ -68,9 +69,7 @@ limitations under the License.
       gapi.client.load(library.name, library.version, function() {});
     });
 
-    if (settings.initCallback) {
-      settings.initCallback();
-    }
+    authUser(true, settings.initCallback || function(){});
   };
 
   // This method asks the user for permission to read genomics data.
@@ -82,7 +81,11 @@ limitations under the License.
       throw new Error("$.initGenomics must be called first. Use the " +
         "initCallback option if you might encounter a race condition.");
     }
-    authUser(true, callback);
+    if (settings.userAuthorized) {
+      callback();
+    } else {
+      authUser(false, callback);
+    }
   };
 
   // This method must be called to setup the genomics apis.
