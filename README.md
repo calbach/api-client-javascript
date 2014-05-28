@@ -84,7 +84,7 @@ same project that you set up the client ID for.
 
 ## Code layout
 
-index.html:
+* index.html:
 
   loads [Bootstrap](getbootstrap.com) and [jQuery](http://jquery.com/)
 
@@ -92,13 +92,13 @@ index.html:
   It then uses `googlegenomics.jquery.js` to search variants and lookup
   genotype information for a callset.
 
-bigquery.html
+* bigquery.html
 
-  An example of how to use the BigQuery javascript APIs to execute a SQL query
-  against the available genomics data. See 
+  An example of how to use the [BigQuery APIs](https://developers.google.com/bigquery/docs/reference/v2/) 
+  with javascript to execute a SQL query against the available genomics data. See 
   [bigquery-examples](https://github.com/googlegenomics/bigquery-examples) for query and table details.
 
-googlegenomics.jquery.js:
+* googlegenomics.jquery.js:
 
   this is a work-in-progress jQuery plugin that makes fetching data from the
   [Genomics API](http://developers.google.com/genomics) a bit easier. It wraps
