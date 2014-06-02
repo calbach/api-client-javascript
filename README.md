@@ -88,7 +88,7 @@ same project that you set up the client ID for.
 
   loads [Bootstrap](getbootstrap.com) and [jQuery](http://jquery.com/)
 
-  The file contains some simple html construction based on the `genePanels` json variable.
+  The file contains some simple html construction based on the `traits` json variable.
   It then uses `googlegenomics.jquery.js` to search variants and lookup
   genotype information for a callset.
 
