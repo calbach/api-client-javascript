@@ -38,7 +38,7 @@ limitations under the License.
         <input type="text" class="form-control" id="callsetId" value="376902546192-0"/> <!-- HG00096 in 1000 genomes -->
       </div>
       <div class="form-group">
-        <label for="panelSelector">Choose a gene panel</label>
+        <label for="panelSelector">Choose a trait</label>
         <select class="form-control" id="panelSelector"></select>
       </div>
     </form>
@@ -74,7 +74,7 @@ limitations under the License.
 // Constants
 $.initGenomics({clientId: 'your-client-id-goes-here'});
 
-var genePanels = [
+var traits = [
   // Red hair indicators
   {name: 'Red hair', alleles: [
     {name: 'rs34474212', description: 'Gene MC1R, normally C or T',
@@ -103,7 +103,7 @@ var genePanels = [
   ]
   },
 
-  // Gene panel test
+  // Trait test
   {name: 'Test', alleles: [
     {contig: '22', position: 16051477, allele: 'A', score: 5},
     {contig: '22', position: 16051477, allele: 'C', score: 3}
@@ -116,19 +116,19 @@ var genePanels = [
 ];
 
 
-// Load the gene panel data into the UI
+// Load the trait data into the UI
 var currentPanel = null;
 $(document).ready(function() {
   var selector = $("#panelSelector");
   var alleleScores = $("#alleleScores");
   var totalScore = $("#totalScore");
 
-  for (var i = 0; i < genePanels.length; i++) {
-    $("<option/>", {"value": i}).text(genePanels[i].name).appendTo(selector);
+  for (var i = 0; i < traits.length; i++) {
+    $("<option/>", {"value": i}).text(traits[i].name).appendTo(selector);
   }
 
   selector.change(function() {
-    currentPanel = genePanels[selector.val()];
+    currentPanel = traits[selector.val()];
     alleleScores.empty().append(createAlleleRows(currentPanel));
     totalScore.empty();
   }).change();
