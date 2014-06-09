@@ -38,8 +38,8 @@ limitations under the License.
         <input type="text" class="form-control" id="callsetId" value="376902546192-0"/> <!-- HG00096 in 1000 genomes -->
       </div>
       <div class="form-group">
-        <label for="panelSelector">Choose a trait</label>
-        <select class="form-control" id="panelSelector"></select>
+        <label for="traitSelector">Choose a trait</label>
+        <select class="form-control" id="traitSelector"></select>
       </div>
     </form>
 
@@ -71,67 +71,29 @@ limitations under the License.
 
 
 <script type="text/javascript">
-// Constants
+// Setup the genomics plugin
 $.initGenomics({clientId: 'your-client-id-goes-here'});
-
-var traits = [
-  // Red hair indicators
-  {name: 'Red hair', alleles: [
-    {name: 'rs34474212', description: 'Gene MC1R, normally C or T',
-      contig: '16', position: 89985913, allele: 'C', score: 1},
-
-    {name: 'rs1805006', description: 'Gene MC1R, normally A or C',
-      contig: '16', position: 89985918, allele: 'A', score: 1},
-
-    {name: 'rs11547464', description: 'Gene MC1R, normally A or G',
-      contig: '16', position: 89986091, allele: 'A', score: 1},
-
-    {name: 'rs1110400', description: 'Gene MC1R, normally C or T',
-      contig: '16', position: 89986130, allele: 'C', score: 1},
-
-    {name: 'rs1805007', description: 'Gene MC1R, normally C or G or T',
-      contig: '16', position: 89986117, allele: 'T', score: 1},
-
-    {name: 'rs1805008', description: 'Gene MC1R, normally C or T',
-      contig: '16', position: 89986144, allele: 'T', score: 1},
-
-    {name: 'i3002507', description: 'Gene MC1R, normally C or G',
-      contig: '16', position: 89986546, allele: 'C', score: 1}
-  ], scoreBands: [
-    {score: 2, description: 'Probably has red hair'},
-    {score: 0, description: 'Probably does not have red hair'}
-  ]
-  },
-
-  // Trait test
-  {name: 'Test', alleles: [
-    {contig: '22', position: 16051477, allele: 'A', score: 5},
-    {contig: '22', position: 16051477, allele: 'C', score: 3}
-  ], scoreBands: [
-    {score: 6, description: 'Score greater than 6'},
-    {score: 1, description: 'Score greater than 1'},
-    {score: 0, description: 'Score greater than 0'}
-  ]
-  }
-];
-
 
 // Load the trait data into the UI
 var currentPanel = null;
 $(document).ready(function() {
-  var selector = $("#panelSelector");
-  var alleleScores = $("#alleleScores");
-  var totalScore = $("#totalScore");
+  $.getJSON("traits.json", function(json) {
+    var traits = json.traits;
 
-  for (var i = 0; i < traits.length; i++) {
-    $("<option/>", {"value": i}).text(traits[i].name).appendTo(selector);
-  }
+    var selector = $("#traitSelector");
+    var alleleScores = $("#alleleScores");
+    var totalScore = $("#totalScore");
 
-  selector.change(function() {
-    currentPanel = traits[selector.val()];
-    alleleScores.empty().append(createAlleleRows(currentPanel));
-    totalScore.empty();
-  }).change();
+    for (var i = 0; i < traits.length; i++) {
+      $("<option/>", {"value": i}).text(traits[i].name).appendTo(selector);
+    }
+
+    selector.change(function() {
+      currentPanel = traits[selector.val()];
+      alleleScores.empty().append(createAlleleRows(currentPanel));
+      totalScore.empty();
+    }).change();
+  });
 });
 
 function createAlleleRows(panel) {
