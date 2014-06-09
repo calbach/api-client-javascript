@@ -7,8 +7,8 @@ api-client-javascript
 
 ## Getting started
 
-There are 2 code files in this repository: `index.html` and `googlegenomics.jquery.js`
-You can open `index.html` in your browser directly, but the javascript APIs won't work unless
+There are html and js files in this repository.
+You can open the `index.html` files in your browser directly, but the javascript APIs won't work unless
 the HTML is hosted somewhere. (The Bootstrap css won't load from a `file://` prefix either)
 
 To run a simple HTTP server locally, you can use python:
@@ -17,7 +17,8 @@ cd api-client-javascript
 python -m SimpleHTTPServer 8000
 ```
 
-This will start a local server at `http://localhost:8000`.
+This will start a local server. Visit `http://localhost:8000/traitviewer`
+to see the first javascript example.
 
 To get data from the API, you will also need to use a real Client ID.
 
@@ -39,7 +40,7 @@ To get data from the API, you will also need to use a real Client ID.
 * Click the **Create Client ID** button
 
 * From the newly created **Client ID for web application**, copy the `Client ID`
-  value into the `clientId` variable inside `index.html`.
+  value into the `clientId` variable inside `traitviewer/index.html`.
   The clientId line that used to look like this:
 
   `$.initGenomics({clientId: 'your-client-id-goes-here'});`
@@ -48,7 +49,7 @@ To get data from the API, you will also need to use a real Client ID.
 
   `$.initGenomics({clientId: '12345.apps.googleusercontent.com'});`
 
-* Save the index.html file, reload the `http://localhost:8000` page, and
+* Save the traitviewer/index.html file, reload the `http://localhost:8000/traitviewer` page, and
   all of the API calls should work.
 
 
@@ -84,7 +85,7 @@ same project that you set up the client ID for.
 
 ## Code layout
 
-* index.html:
+* traitviewer/index.html:
 
   loads [Bootstrap](getbootstrap.com) and [jQuery](http://jquery.com/)
 
