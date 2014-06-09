@@ -62,7 +62,7 @@ Google Genomics data can also be exported to BigQuery, and there are many SQL
 snippets in the [bigquery-examples repository](https://github.com/googlegenomics/bigquery-examples)
 that can be used to query over the resulting data.
 
-The `bigquery.html` file in this repository provides an example of how you can
+The `bigquery/index.html` file in this repository provides an example of how you can
 execute those same SQL snippets from javascript using BigQuery's javascript
 client library and the `googlegenomics.jquery.js` helper code.
 
@@ -70,10 +70,10 @@ Just like the instructions above, you need a valid client ID. This time
 though, make sure the 'BigQuery API' is set to 'ON'. (You can use the same
 project as before - just turn both APIs on.)
 
-Replace `'your-client-id-goes-here'` on line 79 in `bigquery.html`
+Replace `'your-client-id-goes-here'` on line 79 in `bigquery/index.html`
 with your client ID, and run your server as before.
 
-The BigQuery example code will then be at `http://localhost:8000/bigquery.html`
+The BigQuery example code will then be at `http://localhost:8000/bigquery`
 
 Note: You must have a project with BigQuery billing turned on to query against.
 (the second text box in the demo) Follow the [instructions from the
@@ -92,7 +92,7 @@ same project that you set up the client ID for.
   It then uses `googlegenomics.jquery.js` to search variants and lookup
   genotype information for a callset.
 
-* bigquery.html
+* bigquery/index.html
 
   An example of how to use the [BigQuery APIs](https://developers.google.com/bigquery/docs/reference/v2/) 
   with javascript to execute a SQL query against the available genomics data. See 
