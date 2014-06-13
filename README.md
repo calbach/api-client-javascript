@@ -25,13 +25,10 @@ To get data from the API, you will also need to use a real Client ID.
 * First apply for access to the Genomics API by following the instructions at
   https://developers.google.com/genomics/
 
-* Then create a project in the
-  [Google Developers Console](https://console.developers.google.com>)
-  or select an existing one.
+* Then create a [Genomics enabled project](https://console.developers.google.com/flows/enableapi?apiid=genomics)
+  in the Google Developers Console.
 
-* On the **APIs & auth** tab, select APIs and turn the Genomics API to ON
-
-* On the **Credentials** tab, click **Create new Client ID** under
+* Once you are redirected to the **Credentials** tab, click **Create new Client ID** under
   the OAuth section.
 
 * Set **Application type** to **Web application**, and change
@@ -68,8 +65,8 @@ execute those same SQL snippets from javascript using BigQuery's javascript
 client library and the `googlegenomics.jquery.js` helper code.
 
 Just like the instructions above, you need a valid client ID. This time
-though, make sure the 'BigQuery API' is set to 'ON'. (You can use the same
-project as before - just turn both APIs on.)
+though, make sure you have a [BigQuery enabled project](https://console.developers.google.com/flows/enableapi?apiid=bigquery). (You can use the same
+project as before)
 
 Replace `'your-client-id-goes-here'` on line 79 in `bigquery/index.html`
 with your client ID, and run your server as before.
