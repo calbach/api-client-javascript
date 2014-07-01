@@ -22,10 +22,7 @@ to see the first javascript example.
 
 To get data from the API, you will also need to use a real Client ID.
 
-* First apply for access to the Genomics API by following the instructions at
-  https://developers.google.com/genomics/
-
-* Then create a [Genomics enabled project](https://console.developers.google.com/flows/enableapi?apiid=genomics)
+* First create a [Genomics enabled project](https://console.developers.google.com/flows/enableapi?apiid=genomics)
   in the Google Developers Console.
 
 * Once you are redirected to the **Credentials** tab, click **Create new Client ID** under
