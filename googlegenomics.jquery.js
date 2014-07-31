@@ -76,8 +76,8 @@ limitations under the License.
   // header, error handler, and json type setting.
   // The path parameter is a relative genomics path, like '/readsets/search'
   // The correct base url will be prepended.
-  $.genomicsAjax = function(path, settings) {
-    $.ajax(settings.extend({
+  $.genomicsAjax = function(path, options) {
+    $.ajax($.extend({
       url: 'https://www.googleapis.com/genomics/v1beta' + path,
       contentType: 'application/json; charset=utf-8',
       dataType: 'json',
@@ -88,7 +88,7 @@ limitations under the License.
       error: function(xhr) {
         alert("API call failed: " + xhr.responseJSON.error.message);
       }
-    }));
+    }, options));
   };
 
   // This method asks the user for permission to read genomics data.
