@@ -72,6 +72,25 @@ limitations under the License.
     authUser(true, settings.initCallback || function(){});
   };
 
+  // Wraps jQuery's ajax with useful defaults - including an authorization
+  // header, error handler, and json type setting.
+  // The path parameter is a relative genomics path, like '/readsets/search'
+  // The correct base url will be prepended.
+  $.genomicsAjax = function(path, settings) {
+    $.ajax(settings.extend({
+      url: 'https://www.googleapis.com/genomics/v1beta' + path,
+      contentType: 'application/json; charset=utf-8',
+      dataType: 'json',
+      beforeSend: function (request) {
+        request.setRequestHeader('Authorization',
+          'Bearer ' + gapi.auth.getToken().access_token);
+      },
+      error: function(xhr) {
+        alert("API call failed: " + xhr.responseJSON.error.message);
+      }
+    }));
+  };
+
   // This method asks the user for permission to read genomics data.
   // (If access has already been granted, then the asking will be invisible)
   //
