@@ -18,7 +18,9 @@ limitations under the License.
 <head>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" charset="utf-8"></script>
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-  <script src="/googlegenomics.jquery.js"></script>
+
+  <!-- The googlegenomics plugin can be sourced directly from rawgit.com -->
+  <script src="//rawgit.com/googlegenomics/api-client-javascript/master/googlegenomics.jquery.js"></script>
 
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
@@ -129,15 +131,15 @@ function scorePanel() {
   var callsetId = callsetInput.val();
 
   // First lookup the callset to get the datasetId
-  gapi.client.genomics.callsets.get(callsetId).execute(function(json, raw) {
-    // TODO: This call isn't implemented yet! For now, we'll just hardcode the datasetId
-    // TODO: After it works again, if the call errors out, tell the user the callsetId is invalid
-    var datasetId = "376902546192";
+  $.genomicsAjax('/callsets/' + callsetId, {
+    success: function(json) {
+      var datasetId = json.datasetId;
 
-    var totals = {finished: 0, score: 0, count: currentPanel.alleles.length};
-    for (var i = 0; i < currentPanel.alleles.length; i++) {
-      var allele = currentPanel.alleles[i];
-      scoreAllele(datasetId, callsetId, allele, i, totals);
+      var totals = {finished: 0, score: 0, count: currentPanel.alleles.length};
+      for (var i = 0; i < currentPanel.alleles.length; i++) {
+        var allele = currentPanel.alleles[i];
+        scoreAllele(datasetId, callsetId, allele, i, totals);
+      }
     }
   });
 }
@@ -153,37 +155,41 @@ function scoreAllele(datasetId, callsetId, allele, number, totals) {
 
   // Search over the variants at each contig position to see what
   // genotype the callset has.
-  gapi.client.genomics.variants.search(params).execute(function(json) {
-    var callsetGenotype = getGenotype(json.variants || [],
-        allele.position, callsetId);
+  $.genomicsAjax('/variants/search', {
+    method: 'POST',
+    data: JSON.stringify(params),
+    success: function(json) {
+      var callsetGenotype = getGenotype(json.variants || [],
+          allele.position, callsetId);
 
-    var matchesAllele = callsetGenotype.indexOf(allele.allele) != -1;
-    var callsetScore = matchesAllele ? allele.score : 0;
+      var matchesAllele = callsetGenotype.indexOf(allele.allele) != -1;
+      var callsetScore = matchesAllele ? allele.score : 0;
 
-    $("#callsetAllele" + number).text(callsetGenotype.join(";"));
-    $("#callsetScore" + number).text(callsetScore).parent()
-        .addClass(matchesAllele ? "success" : "");
+      $("#callsetAllele" + number).text(callsetGenotype.join(";"));
+      $("#callsetScore" + number).text(callsetScore).parent()
+          .addClass(matchesAllele ? "success" : "");
 
-    totals.score += callsetScore;
-    totals.finished++;
+      totals.score += callsetScore;
+      totals.finished++;
 
 
-    // Once all the alleles have been loaded, display the total score
-    if (totals.finished == totals.count) {
-      var description = "";
-      for (var i = 0; i < currentPanel.scoreBands.length; i++) {
-        var band = currentPanel.scoreBands[i];
-        if (totals.score >= band.score) {
-          description = band.description;
-          break;
+      // Once all the alleles have been loaded, display the total score
+      if (totals.finished == totals.count) {
+        var description = "";
+        for (var i = 0; i < currentPanel.scoreBands.length; i++) {
+          var band = currentPanel.scoreBands[i];
+          if (totals.score >= band.score) {
+            description = band.description;
+            break;
+          }
         }
+
+        $("#scoreButton").button('reset');
+
+        var scoreDiv = $("#totalScore");
+        $("<div>").text(totals.score).appendTo(scoreDiv);
+        $("<div>").text(description).appendTo(scoreDiv);
       }
-
-      $("#scoreButton").button('reset');
-
-      var scoreDiv = $("#totalScore");
-      $("<div>").text(totals.score).appendTo(scoreDiv);
-      $("<div>").text(description).appendTo(scoreDiv);
     }
   });
 }

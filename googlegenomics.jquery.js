@@ -72,19 +72,57 @@ limitations under the License.
     authUser(true, settings.initCallback || function(){});
   };
 
+  // Wraps jQuery's ajax with useful defaults - including an authorization
+  // header, error handler, and json type setting.
+  //
+  // The path parameter is a relative genomics path, like '/readsets/search'
+  // The correct base url will be prepended.
+  //
+  // When using this function, you do not need to make calls to $.authGenomics
+  // nor use the initCallback option in $.initGenomics.
+  //
+  // Example usage:
+  //  $.initGenomics({clientId: clientId});
+  //  $.genomicsAjax('/datasets/376902546192', {
+  //      success: function(dataset) { alert("Dataset: " + dataset.name); }
+  //  });
+  //
+  $.genomicsAjax = function(path, options) {
+    $.authGenomics(function() {
+      $.ajax($.extend({
+        url: 'https://www.googleapis.com/genomics/v1beta' + path,
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        beforeSend: function (request) {
+          request.setRequestHeader('Authorization',
+            'Bearer ' + gapi.auth.getToken().access_token);
+        },
+        error: function(xhr) {
+          alert("API call failed: " + xhr.responseJSON.error.message);
+        }
+      }, options))
+    });
+  };
+
   // This method asks the user for permission to read genomics data.
   // (If access has already been granted, then the asking will be invisible)
   //
   // Inside of the callback, use the gapi.client.genomics.* calls to fetch data.
   $.authGenomics = function(callback) {
     if (!settings) {
-      throw new Error("$.initGenomics must be called first. Use the " +
-        "initCallback option if you might encounter a race condition.");
+      throw new Error("$.initGenomics must be called first.");
     }
     if (settings.userAuthorized) {
       callback();
-    } else {
+    } else if (window['gapi']) {
       authUser(false, callback);
+    } else {
+      // The API hasn't loaded yet, queue the callback
+      var oldCallback = settings.initCallback;
+      settings.initCallback = !oldCallback ? callback : function() {
+        callback();
+        oldCallback();
+      }
     }
   };
 
