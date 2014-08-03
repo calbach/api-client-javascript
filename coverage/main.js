@@ -5,51 +5,50 @@ $(function() {
       attr("height", len);
 
   var color = d3.scale.category20().domain(data.length);
-  var g = svg.selectAll('g').data(data).
+  var pie = d3.layout.pie().
+      sort(function(a, b) { return d3.ascending(a.i, b.i); }).
+      value(function(d) {
+        return d.range.sequenceEnd - d.range.sequenceStart;
+      });
+
+  var g = svg.selectAll('g').data(pie(data)).
       enter().
           append('g').
           attr('transform', 'translate(' + len/2 + ',' + len/2 + ')').
           attr('fill', function(d, i) { return color(i); });
 
-  // Compute the arc paths. The thickness of the arc is proportional to the
-  // coverage in that bucket. The angle width is proportional to the length of
-  // bucket's genomic range.
-  var chrOffsets = {};
-  data.reduce(function(sum, d) {
-    chrOffsets[d.range.sequenceName] = sum;
-    return sum + d.range.sequenceEnd;
-  }, 0);
-  var posScale = d3.scale.linear().
-      domain([0, d3.sum(data, function(d) { return d.range.sequenceEnd; })]).
-      range([0, 2*Math.PI]);
-  var outerR = function(d) {
-    return len/4 + Math.min(2*d.meanCoverage, len);
-  };
-  var arc = d3.svg.arc().
+  var arc0 = d3.svg.arc().
       innerRadius(len/4).
-      outerRadius(outerR).
-      startAngle(function(d) {
-        return posScale(
-            chrOffsets[d.range.sequenceName] + d.range.sequenceStart);
-      }).
-      endAngle(function(d) {
-        return posScale(chrOffsets[d.range.sequenceName] + d.range.sequenceEnd);
-      });
-  g.append('path').attr('d', arc);
+      outerRadius(len/4);
+  var arc = arc0.outerRadius(function(d) {
+    return len/4 + Math.min(2*d.data.meanCoverage, len);
+  });
+  g.append('path').attr('d', arc0).
+      transition().
+          ease('bounce').
+          delay(250).attrTween('d', function(d) {
+            var interpolate = d3.interpolate(0, d.data.meanCoverage);
+            return function(t) {
+              d.data.meanCoverage = interpolate(t);
+              return arc(d);
+            };
+          });
 
   // Add a label for each chromosome.
   g.append('text').
-      text(function(d) { return d.range.sequenceName; }).
+      text(function(d) { return d.data.range.sequenceName; }).
       attr('transform', function(d) {
         var c = arc.centroid(d),
             x = c[0],
             y = c[1],
             h = Math.sqrt(x*x + y*y);
-        var lr = outerR(d) + 20;
+        var lr = arc.outerRadius()(d) + 20;
         return 'translate(' + (x/h * lr) +  ',' + (y/h * lr) +  ')';
       }).
       attr('text-anchor', 'middle').
-      attr('fill', function(d, i) { return color(i); });
+      attr('fill', function(d, i) { return color(i); }).
+      attr('opacity', 0).
+      transition().delay(700).duration(300).ease('in').attr('opacity', 1);
 });
 
 var data = [
@@ -253,8 +252,9 @@ var data = [
    },
    "meanCoverage": 10.837241
   }
-].map(function(d) {
+].map(function(d, i) {
   d.range.sequenceStart = Number(d.range.sequenceStart);
   d.range.sequenceEnd = Number(d.range.sequenceEnd);
+  d.i = i;
   return d;
 });
