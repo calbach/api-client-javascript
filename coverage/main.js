@@ -1,8 +1,8 @@
 $(function() {
   var len = 500;
-  var svg = d3.select("body").append("svg").
-      attr("width", len).
-      attr("height", len);
+  var svg = d3.select("body").append("svg")
+      .attr("width", len)
+      .attr("height", len);
 
   var color = d3.scale.category20().domain(data.length);
   var pie = d3.layout.pie().
@@ -10,23 +10,26 @@ $(function() {
       value(function(d) {
         return d.range.sequenceEnd - d.range.sequenceStart;
       });
+  var g = svg.selectAll('g').data(pie(data))
+      .enter()
+          .append('g')
+          .attr('transform', 'translate(' + len/2 + ',' + len/2 + ')')
+          .attr('fill', function(d, i) { return color(i); });
 
-  var g = svg.selectAll('g').data(pie(data)).
-      enter().
-          append('g').
-          attr('transform', 'translate(' + len/2 + ',' + len/2 + ')').
-          attr('fill', function(d, i) { return color(i); });
-
-  var arc0 = d3.svg.arc().
-      innerRadius(len/4).
-      outerRadius(len/4);
-  var arc = arc0.outerRadius(function(d) {
-    return len/4 + Math.min(2*d.data.meanCoverage, len);
-  });
-  g.append('path').attr('d', arc0).
-      transition().
-          ease('bounce').
-          delay(250).attrTween('d', function(d) {
+  var arc0 = d3.svg.arc()
+      .innerRadius(len/4)
+      .outerRadius(len/4);
+  var arc = d3.svg.arc()
+      .innerRadius(len/4)
+      .outerRadius(function(d) {
+        return len/4 + Math.min(2*d.data.meanCoverage, len);
+      });
+  g.append('path')
+      .attr('d', arc0)
+      .transition()
+          .ease('bounce')
+          .delay(function(d, i) { return 20*i; })
+          .attrTween('d', function(d) {
             var interpolate = d3.interpolate(0, d.data.meanCoverage);
             return function(t) {
               d.data.meanCoverage = interpolate(t);
@@ -35,20 +38,24 @@ $(function() {
           });
 
   // Add a label for each chromosome.
-  g.append('text').
-      text(function(d) { return d.data.range.sequenceName; }).
-      attr('transform', function(d) {
+  g.append('text')
+      .text(function(d) { return d.data.range.sequenceName; })
+      .attr('transform', function(d) {
         var c = arc.centroid(d),
             x = c[0],
             y = c[1],
-            h = Math.sqrt(x*x + y*y);
-        var lr = arc.outerRadius()(d) + 20;
+            h = Math.sqrt(x*x + y*y),
+            lr = arc.outerRadius()(d) + 20;
         return 'translate(' + (x/h * lr) +  ',' + (y/h * lr) +  ')';
-      }).
-      attr('text-anchor', 'middle').
-      attr('fill', function(d, i) { return color(i); }).
-      attr('opacity', 0).
-      transition().delay(700).duration(300).ease('in').attr('opacity', 1);
+      })
+      .attr('text-anchor', 'middle')
+      .attr('fill', function(d, i) { return color(i); })
+      .attr('opacity', 0)
+      .transition()
+          .delay(function(d, i) { return 400 + 20*i; })
+          .duration(300)
+          .ease('in')
+          .attr('opacity', 1);
 });
 
 var data = [
